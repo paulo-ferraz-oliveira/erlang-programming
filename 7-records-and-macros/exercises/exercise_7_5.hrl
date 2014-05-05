@@ -1,0 +1,1 @@
+-record(bt, {h, l, r}).
