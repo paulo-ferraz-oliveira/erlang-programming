@@ -1,0 +1,36 @@
+-module(db).
+-vsn(1.2).
+
+-export([new/0, destroy/1]).
+-export([write/3, read/2, delete/2]).
+-export([convert/2]).
+
+new() ->
+    gb_trees:empty().
+
+write(Key, Data, Db) ->
+    gb_trees:insert(Key, Data, Db).
+
+read(Key, Db) ->
+    case gb_trees:lookup(Key, Db) of
+        none -> {error, instance};
+        {value, Data} -> {ok, Data}
+    end.
+
+destroy(_Db) ->
+    ok.
+
+delete(Key, Db) ->
+    gb_trees:delete(Key, Db).
+
+convert(dict, Dict) ->
+    dict(dict:fetch_keys(Dict), Dict, new());
+convert(_, Data) ->
+    Data.
+
+dict([Key | Tail], Dict, GbTree) ->
+    Data = dict:fetch(Key, Dict),
+    NewGbTree = gb_trees:insert(Key, Data, GbTree),
+    dict(Tail, Dict, NewGbTree);
+dict([], _, GbTree) ->
+    GbTree.
